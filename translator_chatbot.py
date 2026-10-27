@@ -8,6 +8,15 @@ from io import BytesIO
 import nltk
 from nltk.corpus import wordnet
 
+
+# ---------- DOWNLOAD WORDNET IF MISSING ----------
+
+try:
+    nltk.data.find("corpora/wordnet")
+except LookupError:
+    nltk.download("wordnet", quiet=True)
+
+
 st.set_page_config(
     page_title="LinguaBot AI",
     page_icon="🤖",
