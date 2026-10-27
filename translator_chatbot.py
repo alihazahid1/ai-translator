@@ -114,26 +114,45 @@ LANGUAGES = {
 TTS_LANGUAGES = LANGUAGES.copy()
 
 
+
 def translate_text(text, source_code, target_code):
     params = {
         "q": text,
         "langpair": f"{source_code}|{target_code}",
         "mt": 1,
+        "de": "alihazahidfsc08@gmail.com"
     }
-    response = requests.get(API_URL, params=params, timeout=30)
+
+    response = requests.get(
+        API_URL,
+        params=params,
+        timeout=30
+    )
+
+    if response.status_code == 429:
+        raise Exception(
+            "MyMemory usage limit reached. Please try again later."
+        )
+
     response.raise_for_status()
     data = response.json()
 
     if data.get("responseStatus") != 200:
-        raise ValueError(
-            data.get("responseDetails", "Translation failed")
+        message = data.get(
+            "responseDetails",
+            "Translation service failed."
         )
+        raise Exception(message)
 
-    result = data.get("responseData", {}).get("translatedText", "")
-    if not result:
-        raise ValueError("No translated text returned.")
+    translated = data.get("responseData", {}).get(
+        "translatedText", ""
+    )
 
-    return result
+    if not translated:
+        raise Exception("No translation was returned.")
+
+    return html.unescape(translated)
+
 
 
 def get_synonyms(word):
