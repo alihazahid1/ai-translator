@@ -115,6 +115,7 @@ TTS_LANGUAGES = LANGUAGES.copy()
 
 
 
+
 def translate_text(text, source_code, target_code):
     params = {
         "q": text,
@@ -131,18 +132,18 @@ def translate_text(text, source_code, target_code):
 
     if response.status_code == 429:
         raise Exception(
-            "MyMemory usage limit reached. Please try again later."
+            f"MyMemory returned HTTP 429. "
+            f"Details: {response.text[:500]}"
         )
 
     response.raise_for_status()
     data = response.json()
 
     if data.get("responseStatus") != 200:
-        message = data.get(
-            "responseDetails",
-            "Translation service failed."
+        raise Exception(
+            data.get("responseDetails")
+            or "Translation service failed."
         )
-        raise Exception(message)
 
     translated = data.get("responseData", {}).get(
         "translatedText", ""
@@ -152,6 +153,7 @@ def translate_text(text, source_code, target_code):
         raise Exception("No translation was returned.")
 
     return html.unescape(translated)
+
 
 
 
